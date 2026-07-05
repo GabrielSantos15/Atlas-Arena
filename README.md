@@ -1,36 +1,52 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ⚡ Quiz Multiplayer
 
-## Getting Started
+![Status Em Desenvolvimento](https://img.shields.io/badge/Status-Em%20Desenvolvimento-yellow?style=for-the-badge)
+![Next.js](https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwindcss&logoColor=white)
+![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)
+![Express](https://img.shields.io/badge/Express.js-000000?style=for-the-badge&logo=express&logoColor=white)
+![Socket.io](https://img.shields.io/badge/Socket.io-010101?style=for-the-badge&logo=socketdotio&logoColor=white)
 
-First, run the development server:
+Uma plataforma de quiz multiplayer em tempo real, projetada para testar conhecimentos em salas temáticas simultâneas. Desenvolvida com foco em alta performance, UX/UI responsiva e arquitetura orientada a eventos.
 
+## 🎯 Visão Geral do Projeto
+
+Este projeto é um estudo de caso prático focado em resolver os desafios de conectividade e gestão de estado em aplicações **Stateful**. A plataforma simula a dinâmica de jogos interativos, permitindo que múltiplos usuários conectem-se a salas temáticas (ex: Tecnologia, Matemática, Lógica) e interajam simultaneamente com latência mínima.
+
+### 🚀 Principais Funcionalidades (Em Desenvolvimento)
+- **Salas Temáticas (Rooms):** Isolamento de tráfego via WebSockets, garantindo que eventos ocorram de forma independente em diferentes sessões.
+- **Sincronização em Tempo Real:** Atualização instantânea de placares, cronômetros e transição de perguntas sem necessidade de *polling*.
+- **Gestão de Estado In-Memory:** Lógica de partida processada diretamente na memória do servidor Node.js para maximizar a velocidade de resposta, sem sobrecarga de banco de dados no núcleo do jogo.
+- **Interface Fluida e Dinâmica:** Feedback visual imediato e animações otimizadas na transição de estados do jogo.
+
+## 🏗️ Arquitetura e Tecnologias
+
+A aplicação utiliza uma arquitetura separada para contornar as limitações de conexões contínuas (WebSockets) em ambientes *Serverless*, garantindo escalabilidade e robustez.
+
+**Front-end (Interface & BFF):**
+- **Next.js (App Router):** Framework React para renderização e rotas.
+- **TypeScript:** Tipagem estática para maior segurança no fluxo de dados.
+- **Tailwind CSS:** Estilização utilitária ágil e responsiva.
+
+**Back-end (Servidor de Tempo Real):**
+- **Node.js & Express:** Servidor dedicado para manter conexões stateful ativas.
+- **Socket.io:** Motor de comunicação bidirecional e orientada a eventos.
+
+## 🛠️ Como Executar Localmente
+
+*(Instruções detalhadas de inicialização do Back-end serão adicionadas em breve).*
+
+### Front-end
 ```bash
+# Clone o repositório
+git clone 
+
+# Acesse a pasta do front-end
+cd quiz-multiplayer/frontend
+
+# Instale as dependências
+npm install
+
+# Inicie o servidor de desenvolvimento
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
