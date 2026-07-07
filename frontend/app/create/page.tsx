@@ -8,49 +8,38 @@ import { saveRoomSession } from "@/lib/storage/room-session";
 import socket from "@/lib/socket";
 import FormUser from "@/components/setup/FormUser";
 
-type Operation =
-  | "addition"
-  | "subtraction"
-  | "multiplication"
-  | "division";
-
-type Difficulty = "easy" | "medium" | "hard";
+type GeographyMode = "flags" | "capitals" | "continents";
 
 interface RoomResponse {
   code: string;
 }
 
-const operations = [
+const geographyModes = [
   {
-    value: "addition",
-    label: "Adição",
-    icon: "+",
+    value: "flags",
+    label: "Bandeiras",
+    icon: "🏳️",
   },
   {
-    value: "subtraction",
-    label: "Subtração",
-    icon: "-",
+    value: "capitals",
+    label: "Capitais",
+    icon: "🏛️",
   },
   {
-    value: "multiplication",
-    label: "Multiplicação",
-    icon: "×",
-  },
-  {
-    value: "division",
-    label: "Divisão",
-    icon: "÷",
+    value: "continents",
+    label: "Continentes",
+    icon: "🌍",
   },
 ] as const;
 
 export default function CreateRoom() {
   const router = useRouter();
 
-  const [operation, setOperation] =
-    useState<Operation>("addition");
+  const [mode, setMode] =
+    useState<GeographyMode>("flags");
 
-  const [difficulty, setDifficulty] =
-    useState<Difficulty>("easy");
+  const [isPublic, setIsPublic] =
+    useState(true);
 
   const [questionsAmount, setQuestionsAmount] =
     useState(10);
@@ -87,8 +76,9 @@ export default function CreateRoom() {
 
     socket.emit("room:create", {
       hostId: session.playerId,
-      operation,
-      difficulty,
+      category: "geography",
+      mode,
+      isPublic,
       questionsAmount,
       questionTime,
     });
@@ -96,13 +86,13 @@ export default function CreateRoom() {
 
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-[var(--bg-primary)] px-6 py-10">
+    <main className="min-h-screen flex items-center justify-center bg-(--bg-primary) px-6 py-10">
 
       <section className="
         w-full max-w-xl
         rounded-3xl
-        bg-[var(--bg-surface)]
-        border border-[var(--border-color)]
+        bg-(--bg-surface)
+        border border-(--border-color)
         p-8
         shadow-xl
       ">
@@ -112,32 +102,32 @@ export default function CreateRoom() {
             Criar Sala 🎮
           </h1>
 
-          <p className="mt-2 text-sm text-[var(--text-secondary)]">
+          <p className="mt-2 text-sm text-(--text-secondary)">
             Configure sua partida e escolha seu perfil.
           </p>
         </header>
 
         <div className="space-y-5 mb-8">
-          {/* Operação */}
+          {/* Modo */}
           <div>
             <label className="mb-3 block text-sm font-medium">
-              Operação
+              Modo de geografia
             </label>
 
             <div className="grid grid-cols-2 gap-3">
-              {operations.map((item) => (
+              {geographyModes.map((item) => (
                 <button
                   key={item.value}
                   type="button"
                   onClick={() =>
-                    setOperation(item.value)
+                    setMode(item.value)
                   }
                   className={`
                     rounded-xl border p-4
                     transition
-                    ${operation === item.value
+                    ${mode === item.value
                       ? "border-blue-500 bg-blue-500/10"
-                      : "border-[var(--border-color)] hover:bg-black/5"
+                      : "border-(--border-color) hover:bg-black/5"
                     }
                   `}
                 >
@@ -151,36 +141,31 @@ export default function CreateRoom() {
               ))}
             </div>
           </div>
-          {/* Dificuldade */}
+
           <div>
             <label className="mb-2 block text-sm font-medium">
-              Dificuldade
+              Visibilidade da sala
             </label>
 
             <select
-              value={difficulty}
-              onChange={(e) =>
-                setDifficulty(
-                  e.target.value as Difficulty
-                )
+              value={isPublic ? "public" : "private"}
+              onChange={(event) =>
+                setIsPublic(event.target.value === "public")
               }
               className="
                 w-full rounded-xl
-                border border-[var(--border-color)]
-                bg-[var(--background)]
+                border border-(--border-color)
+                bg-(--background)
                 p-3
                 outline-none
                 focus:ring-2 focus:ring-blue-500
               "
             >
-              <option value="easy">
-                Fácil
+              <option value="public">
+                Pública
               </option>
-              <option value="medium">
-                Médio
-              </option>
-              <option value="hard">
-                Difícil
+              <option value="private">
+                Privada
               </option>
             </select>
           </div>
@@ -201,8 +186,8 @@ export default function CreateRoom() {
                 }
                 className="
                   w-full rounded-xl
-                  border border-[var(--border-color)]
-                  bg-[var(--background)]
+                  border border-(--border-color)
+                  bg-(--background)
                   p-3
                 "
               >
@@ -233,8 +218,8 @@ export default function CreateRoom() {
                 }
                 className="
                   w-full rounded-xl
-                  border border-[var(--border-color)]
-                  bg-[var(--background)]
+                  border border-(--border-color)
+                  bg-(--background)
                   p-3
                 "
               >
@@ -266,7 +251,7 @@ export default function CreateRoom() {
           </p>
         )}
 
-        <div className="border-t border-[var(--border-color)] pt-6">
+        <div className="border-t border-(--border-color) pt-6">
           <h2 className="mb-5 text-lg font-semibold">
             Seu jogador
           </h2>

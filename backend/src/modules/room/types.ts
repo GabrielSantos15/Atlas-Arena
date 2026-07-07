@@ -4,13 +4,22 @@ export enum RoomStatus {
   FINISHED = "finished",
 }
 
-type Operation = "addition" | "subtraction" | "multiplication" | "division";
-type Difficulty = "easy" | "medium" | "hard";
+export enum QuizCategory {
+  GEOGRAPHY = "geography",
+  // MATH = "math" // v2
+}
+
+export enum GeographyMode {
+  FLAGS = "flags",
+  CAPITALS = "capitals",
+  CONTINENTS = "continents",
+}
 
 export type CreateRoomPayload = {
   hostId: string;
-  operation: Operation;
-  difficulty: Difficulty;
+  category: QuizCategory;
+  mode: GeographyMode;
+  isPublic: boolean;
   questionsAmount: number;
   questionTime: number;
 };
@@ -18,14 +27,11 @@ export type CreateRoomPayload = {
 export interface Room {
   code: string;
   hostId: string;
-
-  operation: Operation;
-  difficulty: Difficulty;
-
+  category: QuizCategory;
+  mode: GeographyMode;
+  isPublic: boolean;
   questionsAmount: number;
   questionTime: number;
-
   status: RoomStatus;
-
   players: string[];
 }
