@@ -3,6 +3,8 @@
 import { useEffect, useState, type ReactNode } from "react";
 
 import socket from "@/lib/socket";
+import { getOrCreatePlayerId } from "@/lib/player";
+import { getSession } from "@/lib/storage/player-session";
 
 interface SocketProviderProps {
   children: ReactNode;
@@ -11,21 +13,32 @@ interface SocketProviderProps {
 export default function SocketProvider({
   children,
 }: SocketProviderProps) {
-  const [connected, setConnected] = useState(false)
-  const [socketId, setSocketId] = useState<String>()
+  const [connected, setConnected] = useState(false);
+  const [socketId, setSocketId] = useState<string>("");
 
   useEffect(() => {
-
+    getOrCreatePlayerId();
     socket.connect();
 
     socket.on("connect", () => {
-      setConnected(true)
+      setConnected(true);
       setSocketId(socket.id ?? "");
+
+      const session = getSession();
+
+      // re-registra o jogador ao conectar/reconectar para manter o lobby consistente
+      if (session) {
+        socket.emit("player:register", {
+          playerId: session.playerId,
+          nickname: session.nickname,
+          avatarSeed: session.avatarSeed,
+        });
+      }
     });
 
-    socket.on("disconnect", (reason) => {
-      setConnected(false)
-      console.log("❌ Desconectado:", reason);
+    socket.on("disconnect", () => {
+      setConnected(false);
+      setSocketId("");
     });
 
     return () => {
@@ -38,11 +51,6 @@ export default function SocketProvider({
 
   return (
     <>
-      <div style={{ position: "fixed", top: 10, right: 10 }}>
-        <p>Status: {connected ? "🟢 conectado" : "🔴 desconectado"}</p>
-        <p>ID: {socketId}</p>
-      </div>
-
       {children}
     </>
   );
