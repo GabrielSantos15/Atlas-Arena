@@ -108,3 +108,42 @@ export function registerRoomHandlers(io: Server, socket: Socket) {
     socket.emit("room:joined", room);
   });
 }
+
+export function removePlayerFromRoom(
+  io: Server,
+  room: Room,
+  playerId: string
+) {
+  room.players = room.players.filter(
+    (id) => id !== playerId
+  );
+
+  // ninguém ficou na sala
+  if (room.players.length === 0) {
+    rooms.delete(room.code);
+
+    console.log(`🗑️ Sala ${room.code} removida`);
+
+    return;
+  }
+
+
+  // saiu o host
+  if (room.hostId === playerId) {
+    const newHost = room.players
+      .map((id) => players.get(id))
+      .find((player) => player?.online);
+
+    if (newHost) {
+      room.hostId = newHost.playerId;
+
+      console.log(
+        `👑 Novo host: ${newHost.nickname}`
+      );
+    }
+  }
+
+  rooms.set(room.code, room);
+
+  emitRoomUpdate(io, room);
+}
