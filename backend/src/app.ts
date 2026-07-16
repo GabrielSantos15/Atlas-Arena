@@ -23,10 +23,10 @@ app.get("/rooms/public", (_, res) => {
       (room) => room.isPublic,
       // && room.status === RoomStatus.WAITING
     )
-    .map((room) => ({
+.map((room) => ({
       code: room.code,
       category: room.category,
-      mode: room.mode,
+      difficulty: room.difficulty, 
       questionsAmount: room.questionsAmount,
       questionTime: room.questionTime,
       playersCount: room.players.length,
