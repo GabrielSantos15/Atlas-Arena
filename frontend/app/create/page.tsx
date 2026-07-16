@@ -8,6 +8,15 @@ import type { PlayerSession } from "@/lib/storage/player-session";
 import { saveRoomSession } from "@/lib/storage/room-session";
 import socket from "@/lib/socket";
 
+import {
+  Circle,
+  Globe,
+  Lock,
+  Clock,
+  BookOpen,
+  Gamepad2,
+} from "lucide-react";
+
 type QuizDifficulty = "easy" | "medium" | "hard";
 
 interface RoomResponse {
@@ -18,38 +27,27 @@ const difficulties = [
   {
     value: "easy",
     label: "Fácil",
-    icon: "🟢",
-    description: "Bandeiras, capitais e continentes.",
+    description: "Bandeiras, continentes e mapas",
   },
   {
     value: "medium",
     label: "Médio",
-    icon: "🟡",
-    description: "Inclui idiomas e moedas.",
+    description: "Inclui capitais e fronteiras além das fáceis",
   },
   {
     value: "hard",
     label: "Difícil",
-    icon: "🔴",
-    description: "Inclui população, área, fronteiras e muito mais.",
+    description: "Inclui população e área, além das médias",
   },
 ] as const;
 
 export default function CreateRoom() {
   const router = useRouter();
 
-  const [difficulty, setDifficulty] =
-    useState<QuizDifficulty>("easy");
-
-  const [isPublic, setIsPublic] =
-    useState(true);
-
-  const [questionsAmount, setQuestionsAmount] =
-    useState(10);
-
-  const [questionTime, setQuestionTime] =
-    useState(15);
-
+  const [difficulty, setDifficulty] = useState<QuizDifficulty>("easy");
+  const [isPublic, setIsPublic] = useState(true);
+  const [questionsAmount, setQuestionsAmount] = useState(5);
+  const [questionTime, setQuestionTime] = useState(15);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -75,7 +73,7 @@ export default function CreateRoom() {
 
         setError(
           payload.message ??
-            "Não foi possível criar a sala."
+          "Não foi possível criar a sala."
         );
       }
     );
@@ -90,11 +88,31 @@ export default function CreateRoom() {
     });
   }
 
+  // Paleta de cores de dificuldades
+  const getDifficultyIcon = (val: QuizDifficulty, isSelected: boolean) => {
+    switch (val) {
+      case "easy":
+        return <Circle className={`w-5 h-5 transition-colors ${isSelected ? "fill-green-500 text-green-500" : "fill-green-500/20 text-green-500/50"}`} />;
+      case "medium":
+        return <Circle className={`w-5 h-5 transition-colors ${isSelected ? "fill-yellow-500 text-yellow-500" : "fill-yellow-500/20 text-yellow-500/50"}`} />;
+      case "hard":
+        return <Circle className={`w-5 h-5 transition-colors ${isSelected ? "fill-red-500 text-red-500" : "fill-red-500/20 text-red-500/50"}`} />;
+    }
+  };
+
   return (
-    <main>
+    <main className="flex min-h-[90vh] flex-col items-center justify-center gap-8  md:flex-row p-4 md:p-8">
+
+      {/*Formulário do Usuário */}
+      <FormUser
+        mode="create"
+        loading={loading}
+        onSubmit={handlePlayerCreated}
+      />
+
+      {/* Configurações da Sala */}
       <section
         className="
-          mx-auto
           w-full
           max-w-2xl
           rounded-3xl
@@ -103,43 +121,20 @@ export default function CreateRoom() {
           bg-[var(--bg-surface)]
           p-8
           shadow-xl
+          h-fit
         "
       >
         <header className="mb-8">
-          <h1 className="text-3xl font-bold">
-            Criar Sala 🎮
+          <h1 className="text-3xl font-bold flex items-center gap-2">
+            Criar Sala <Gamepad2 className="text-[var(--color-primary)]" size={32} />
           </h1>
 
-          <p className="mt-2 text-sm text-(--text-secondary)">
-            Configure sua partida e personalize seu
-            jogador.
+          <p className="mt-2 text-sm text-[var(--text-secondary)]">
+            Configure sua partida e personalize seu jogador.
           </p>
         </header>
 
         <div className="space-y-8">
-          {/* Categoria */}
-          <div>
-            <label className="mb-3 block text-sm font-medium">
-              Categoria
-            </label>
-
-            <div className="rounded-2xl border border-(--border-color) bg-(--background) p-4">
-              <div className="flex items-center gap-3">
-                <span className="text-3xl">🌍</span>
-
-                <div>
-                  <p className="font-semibold">
-                    Geografia
-                  </p>
-
-                  <p className="text-sm text-(--text-secondary)">
-                    Responda perguntas sobre países,
-                    bandeiras, capitais e muito mais.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
 
           {/* Dificuldade */}
           <div>
@@ -148,180 +143,127 @@ export default function CreateRoom() {
             </label>
 
             <div className="grid gap-3">
-              {difficulties.map((item) => (
-                <button
-                  key={item.value}
-                  type="button"
-                  onClick={() =>
-                    setDifficulty(item.value)
-                  }
-                  className={`rounded-2xl border p-4 text-left transition ${
-                    difficulty === item.value
-                      ? "border-blue-500 bg-blue-500/10"
-                      : "border-(--border-color) hover:bg-black/5"
-                  }`}
-                >
-                  <div className="flex items-center gap-4">
-                    <span className="text-3xl">
-                      {item.icon}
-                    </span>
+              {difficulties.map((item) => {
+                const isSelected = difficulty === item.value;
+                return (
+                  <button
+                    key={item.value}
+                    type="button"
+                    onClick={() => setDifficulty(item.value)}
+                    className={`rounded-2xl border p-4 text-left transition-all cursor-pointer ${isSelected
+                      ? "border-[var(--color-secondary)] bg-[var(--color-secondary)]/10 shadow-md scale-[1.01]"
+                      : "border-[var(--border-color)] hover:bg-black/5"
+                      }`}
+                  >
+                    <div className="flex items-center gap-4">
+                      {getDifficultyIcon(item.value, isSelected)}
 
-                    <div>
-                      <p className="font-semibold">
-                        {item.label}
-                      </p>
+                      <div>
+                        <p className="font-semibold">
+                          {item.label}
+                        </p>
 
-                      <p className="text-sm text-(--text-secondary)">
-                        {item.description}
-                      </p>
+                        <p className="text-sm text-[var(--text-secondary)]">
+                          {item.description}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                </button>
-              ))}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
           {/* Configurações */}
-          <div className="grid gap-4 md:grid-cols-3">
-            <div>
+          <div className="grid gap-4 md:grid-cols-3 items-end">
+
+            {/* Visibilidade  */}
+            <div className="flex flex-col">
               <label className="mb-2 block text-sm font-medium">
                 Visibilidade
               </label>
 
-              <select
-                value={
-                  isPublic ? "public" : "private"
-                }
-                onChange={(event) =>
-                  setIsPublic(
-                    event.target.value === "public"
-                  )
-                }
-                className="w-full rounded-xl border border-(--border-color) bg-(--background) p-3"
+              <button
+                type="button"
+                onClick={() => setIsPublic(!isPublic)}
+                className="flex w-full items-center justify-between rounded-xl border border-[var(--border-color)] bg-[var(--background)] p-3 transition-all hover:border-[var(--color-secondary)] cursor-pointer h-[50px] shadow-sm"
               >
-                <option value="public">
-                  🌐 Pública
-                </option>
+                <div className="flex items-center gap-2">
+                  {isPublic ? (
+                    <Globe size={18} className="text-blue-500 animate-[spin_4s_linear_infinite]" />
+                  ) : (
+                    <Lock size={18} className="text-red-500" />
+                  )}
+                  <span className="text-sm font-semibold">
+                    {isPublic ? "Pública" : "Privada"}
+                  </span>
+                </div>
 
-                <option value="private">
-                  🔒 Privada
-                </option>
-              </select>
+                <div
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-300 ${isPublic ? "bg-[var(--color-secondary)]" : "bg-zinc-400 dark:bg-zinc-600"
+                    }`}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-300 ${isPublic ? "translate-x-6" : "translate-x-1"
+                      }`}
+                  />
+                </div>
+              </button>
             </div>
 
+            {/* Questões */}
             <div>
               <label className="mb-2 block text-sm font-medium">
                 Questões
               </label>
 
-              <select
-                value={questionsAmount}
-                onChange={(event) =>
-                  setQuestionsAmount(
-                    Number(event.target.value)
-                  )
-                }
-                className="w-full rounded-xl border border-(--border-color) bg-(--background) p-3"
-              >
-                <option value={5}>5</option>
-                <option value={10}>10</option>
-                <option value={15}>15</option>
-                <option value={20}>20</option>
-              </select>
+              <div className="relative">
+                <select
+                  value={questionsAmount}
+                  onChange={(event) => setQuestionsAmount(Number(event.target.value))}
+                  className="w-full appearance-none rounded-xl border border-[var(--border-color)] bg-[var(--background)] p-3 pr-10 h-[50px] outline-none focus:border-[var(--color-secondary)] cursor-pointer text-sm font-medium"
+                >
+                  <option value={5}>5</option>
+                  <option value={10}>10</option>
+                  <option value={15}>15</option>
+                  <option value={20}>20</option>
+                </select>
+                <BookOpen
+                  size={16}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] pointer-events-none"
+                />
+              </div>
             </div>
 
+            {/* Tempo */}
             <div>
               <label className="mb-2 block text-sm font-medium">
                 Tempo
               </label>
 
-              <select
-                value={questionTime}
-                onChange={(event) =>
-                  setQuestionTime(
-                    Number(event.target.value)
-                  )
-                }
-                className="w-full rounded-xl border border-(--border-color) bg-(--background) p-3"
-              >
-                <option value={10}>
-                  10 segundos
-                </option>
-
-                <option value={15}>
-                  15 segundos
-                </option>
-
-                <option value={30}>
-                  30 segundos
-                </option>
-
-                <option value={60}>
-                  60 segundos
-                </option>
-              </select>
+              <div className="relative">
+                <select
+                  value={questionTime}
+                  onChange={(event) =>
+                    setQuestionTime(Number(event.target.value))
+                  }
+                  className="w-full appearance-none rounded-xl border border-[var(--border-color)] bg-[var(--background)] p-3 pr-10 h-[50px] outline-none focus:border-[var(--color-secondary)] cursor-pointer text-sm font-medium"
+                >
+                  <option value={10}>10 segundos</option>
+                  <option value={15}>15 segundos</option>
+                  <option value={30}>30 segundos</option>
+                  <option value={60}>60 segundos</option>
+                </select>
+                <Clock size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] pointer-events-none" />
+              </div>
             </div>
           </div>
-
-          {/* Resumo */}
-          <section className="rounded-2xl border border-(--border-color) bg-(--background) p-5">
-            <h2 className="mb-4 text-lg font-semibold">
-              Resumo da partida
-            </h2>
-
-            <div className="grid gap-3 text-sm sm:grid-cols-2">
-              <p>
-                🌍 <strong>Categoria:</strong>{" "}
-                Geografia
-              </p>
-
-              <p>
-                🎯 <strong>Dificuldade:</strong>{" "}
-                {
-                  difficulties.find(
-                    (d) =>
-                      d.value === difficulty
-                  )?.label
-                }
-              </p>
-
-              <p>
-                📚 <strong>Questões:</strong>{" "}
-                {questionsAmount}
-              </p>
-
-              <p>
-                ⏱️ <strong>Tempo:</strong>{" "}
-                {questionTime}s
-              </p>
-
-              <p>
-                {isPublic ? "🌐" : "🔒"}{" "}
-                <strong>Visibilidade:</strong>{" "}
-                {isPublic
-                  ? "Pública"
-                  : "Privada"}
-              </p>
-            </div>
-          </section>
 
           {error && (
             <div className="rounded-xl bg-red-500/10 p-3 text-sm text-red-500">
               {error}
             </div>
           )}
-
-          <div className="border-t border-(--border-color) pt-6">
-            <h2 className="mb-5 text-lg font-semibold">
-              Seu jogador
-            </h2>
-
-            <FormUser
-              mode="create"
-              loading={loading}
-              onSubmit={handlePlayerCreated}
-            />
-          </div>
         </div>
       </section>
     </main>

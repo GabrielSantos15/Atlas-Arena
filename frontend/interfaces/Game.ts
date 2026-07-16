@@ -12,6 +12,5 @@ export type PublicQuestion = {
 
 export type QuestionResult = {
     correctAnswer: string;
-    ranking: Player[];
 };
 

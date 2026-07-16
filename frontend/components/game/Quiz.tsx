@@ -29,7 +29,7 @@ export default function Quiz() {
             </div>
         );
     }
-  console.log("Quiz renderizou");
+
     return (
         <article className="mx-auto w-full m-auto max-w-2xl rounded-2xl border border-[var(--border-color)] bg-[var(--bg-surface)] p-6 shadow-lg">
             <h3 className="mb-6 flex gap-3 text-xl font-semibold">
@@ -96,11 +96,11 @@ export default function Quiz() {
                 onClick={() => answer(selectedOption)}
                 className={`
                     mt-6 w-full rounded-xl py-3 font-semibold text-white
-                    transition-all duration-200 bg-[var(--color-primary)] 
+                    transition-all duration-200 bg-[var(--color-primary)]
                     ${
                         !selectedOption || answered
                             ? "opacity-40"
-                            : "hover:scale-[1.01] hover:bg-[var(--hover-primary)]"
+                            : "hover:scale-[1.01] hover:bg-[var(--color-primary-hover)] cursor-pointer"
                     }
                 `}
             >

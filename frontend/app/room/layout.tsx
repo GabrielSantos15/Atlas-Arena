@@ -1,5 +1,6 @@
 import { GameProvider } from "@/providers/GameProvider";
 
+
 export default function RoomLayout({
     children,
 }: {

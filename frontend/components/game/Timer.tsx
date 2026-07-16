@@ -15,13 +15,13 @@ export default function Timer({
 
     const color =
         progress > 0.5
-            ? "var(--color-primary)"
+            ? "#22c55e"
             : progress > 0.25
                 ? "#f59e0b"
                 : "#ef4444";
 
     return (
-        <div className="sticky h-14 w-14">
+        <div className="sticky h-18 w-18 bg-[var(--bg-primary)] p-1 rounded-full">
             <svg
                 className="h-full w-full -rotate-90"
                 viewBox="0 0 52 52"

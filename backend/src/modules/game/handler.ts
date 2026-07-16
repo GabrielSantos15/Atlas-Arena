@@ -69,7 +69,6 @@ export function registerGameHandlers(io: Server, socket: Socket) {
 
     console.log(`🎮 Jogo iniciado na sala ${room.code}`);
 
-    io.to(room.code).emit("game:started", { roomCode: room.code });
     emitRoomUpdate(io, room);
 
     sendQuestion(io, room, game);
@@ -170,16 +169,13 @@ function advanceQuestion(io: Server, room: Room, game: Game) {
     });
   }
 
-  // Ranking atualizado
-  const ranking = room.players
-    .map((playerId) => players.get(playerId))
-    .filter((player): player is Player => player !== undefined)
-    .sort((a, b) => b.score - a.score);
+  rooms.set(room.code, room);
+
+  emitRoomUpdate(io, room);
 
   // Envia o resultado da pergunta
   io.to(room.code).emit("game:question-result", {
     correctAnswer: question.answer,
-    ranking,
   });
 
   // Espera alguns segundos antes da próxima pergunta
@@ -191,9 +187,7 @@ function advanceQuestion(io: Server, room: Room, game: Game) {
 
       rooms.set(room.code, room);
 
-      io.to(room.code).emit("game:ended", {
-        ranking,
-      });
+      // io.to(room.code).emit("game:ended");
 
       games.delete(room.code);
 

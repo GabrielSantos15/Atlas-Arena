@@ -75,7 +75,7 @@ export default function WorldMapQuestion({
 
       <button
         onClick={() => setZoomed((prev) => !prev)}
-        className="rounded-lg bg-blue-600 px-4 py-2 text-white transition hover:bg-blue-700"
+        className="ml-auto rounded-lg bg-[var(--color-secondary)] px-4 py-2 text-white transition hover:bg-[var(--color-secondary-hover)] cursor-pointer "
       >
         {zoomed ? "Ver mapa completo" : "Dar zoom"}
       </button>

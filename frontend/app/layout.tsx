@@ -30,9 +30,9 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         <SocketProvider>
-            <main className="p-5">
-              {children}
-            </main>
+          <main className=" ">
+            {children}
+          </main>
         </SocketProvider>
       </body>
     </html>

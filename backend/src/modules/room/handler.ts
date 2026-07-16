@@ -78,7 +78,10 @@ export function registerRoomHandlers(io: Server, socket: Socket) {
 
     emitRoomUpdate(io, room);
 
-    socket.emit("room:created", room);
+    socket.emit("room:created", {
+      ...room,
+      players: getRoomPlayers(room),
+    });
   });
 
   socket.on("room:join", (data: { roomCode: string; playerId: string }) => {
@@ -139,16 +142,26 @@ export function registerRoomHandlers(io: Server, socket: Socket) {
 
     emitRoomUpdate(io, room);
 
-    socket.emit("room:joined", room);
+    socket.emit("room:joined", {
+      ...room,
+      players: getRoomPlayers(room),
+    });
 
-   const game = games.get(room.code);
+    const game = games.get(room.code);
 
-  if (room.status === RoomStatus.PLAYING && game) {
-    syncPlayerWithCurrentQuestion(socket, room, game);
-  }
+    if (room.status === RoomStatus.PLAYING && game) {
+      syncPlayerWithCurrentQuestion(socket, room, game);
+    }
   });
 
-  socket.on("room:restart", (data) => {
+  socket.on("room:restart", (data?: { roomCode: string; playerId: string }) => {
+    if (!data) {
+      socket.emit("room:error", {
+        message: "Dados inválidos.",
+      });
+      return;
+    }
+
     const room = rooms.get(data.roomCode);
 
     if (!room) return;

@@ -12,14 +12,13 @@ import {
 
 import socket from "@/lib/socket";
 import { usePlayer } from "@/hooks/usePlayer";
-import { getRoomSession, clearRoomSession } from "@/lib/storage/room-session";
-import { useRouter } from "next/navigation";
+import { getRoomSession, clearRoomSession, RoomSession } from "@/lib/storage/room-session";
+import { usePathname, useRouter } from "next/navigation";
+import { sortPlayersForRanking } from "@/lib/ranking";
 
 import type { Room } from "@/interfaces/Room";
 import type { PublicQuestion, QuestionResult } from "@/interfaces/Game";
 import type { Player } from "@/interfaces/Player";
-
-
 
 type GameContextData = {
   room: Room | null;
@@ -30,6 +29,8 @@ type GameContextData = {
 
   result: QuestionResult | null;
   ranking: Player[];
+
+  gameEnded: boolean;
 
   answered: boolean;
   selectedAnswer: string | null;
@@ -49,10 +50,12 @@ export function GameProvider({
   const { session, ready } = usePlayer();
   const router = useRouter();
 
-  const roomSession = useMemo(
-    () => getRoomSession(),
-    []
-  );
+  const [roomSession, setRoomSession] =
+    useState<RoomSession | null>(null);
+
+  useEffect(() => {
+    setRoomSession(getRoomSession());
+  }, []);
 
   const intervalRef = useRef<number | null>(null);
 
@@ -62,29 +65,30 @@ export function GameProvider({
   // Question
   const [currentQuestion, setCurrentQuestion] =
     useState<PublicQuestion | null>(null);
-
   const [questionIndex, setQuestionIndex] =
     useState<number | null>(null);
-
   const [totalQuestions, setTotalQuestions] =
     useState<number | null>(null);
 
   // Answer
   const [selectedAnswer, setSelectedAnswer] =
     useState<string | null>(null);
-
   const [answered, setAnswered] =
     useState(false);
 
   // Result
   const [result, setResult] =
     useState<QuestionResult | null>(null);
-
-  const [ranking, setRanking] = useState<Player[]>([]);
+  const gameEnded = room?.status === "finished";
 
   // Timer
   const [timeLeft, setTimeLeft] =
     useState(0);
+
+  const ranking = useMemo(
+    () => sortPlayersForRanking(room?.players ?? []),
+    [room?.players]
+  );
 
   const resetGameState = useCallback(() => {
     setCurrentQuestion(null);
@@ -104,11 +108,39 @@ export function GameProvider({
     }
   }, []);
 
+
+  const pathname = usePathname();
+
+  // redireciona para paginas de acordo com status
+  useEffect(() => {
+    if (!room) return;
+
+    const lobbyPath = `/room/${room.code}`;
+    const gamePath = `/room/${room.code}/game`;
+
+    if (room.status === "waiting") {
+      if (pathname !== lobbyPath) {
+        router.replace(lobbyPath);
+      }
+
+      return;
+    }
+
+    if (pathname !== gamePath) {
+      router.replace(gamePath);
+    }
+  }, [room, pathname, router]);
+
+  useEffect(() => {
+    setRoomSession(getRoomSession())
+  }, [pathname]);
+
   useEffect(() => {
     if (!ready || !session || !roomSession) {
       return;
     }
 
+    console.log("JOIN vindo do GameProvider");
     socket.emit("room:join", {
       roomCode: roomSession.code,
       playerId: session.playerId,
@@ -116,7 +148,20 @@ export function GameProvider({
 
     function onRoomUpdate(room: Room) {
       setRoom(room);
-      setRanking(room.players);
+
+      if (room.status !== "playing") {
+        setCurrentQuestion(null);
+        setResult(null);
+        setAnswered(false);
+        setSelectedAnswer(null);
+
+        if (intervalRef.current) {
+          clearInterval(intervalRef.current);
+          intervalRef.current = null;
+        }
+
+        setTimeLeft(0);
+      }
     }
 
     function onQuestion(payload: {
@@ -163,15 +208,10 @@ export function GameProvider({
     function onResult(result: QuestionResult) {
       setCurrentQuestion(null);
       setResult(result);
-      setRanking(result.ranking);
     }
 
     function onRestart() {
       resetGameState();
-    }
-
-    function onGameEnded() {
-      setCurrentQuestion(null);
     }
 
     function onRoomError(data: { message: string }) {
@@ -188,23 +228,28 @@ export function GameProvider({
 
     socket.on("game:question", onQuestion);
     socket.on("game:question-result", onResult);
-    socket.on("game:ended", onGameEnded);
 
     return () => {
       socket.off("room:update", onRoomUpdate);
       socket.off("room:joined", onRoomUpdate);
       socket.off("room:restart", onRestart);
+      socket.off("room:error", onRoomError);
 
       socket.off("game:question", onQuestion);
       socket.off("game:question-result", onResult);
-      socket.off("game:ended", onGameEnded);
 
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
         intervalRef.current = null;
       }
     };
-  }, [ready, session, roomSession, resetGameState]);
+  }, [
+    ready,
+    session,
+    roomSession,
+    resetGameState,
+    router,
+  ]);
 
   const answer = useCallback(
     (option: string) => {
@@ -253,6 +298,8 @@ export function GameProvider({
         timeLeft,
 
         answer,
+
+        gameEnded,
       }}
     >
       {children}

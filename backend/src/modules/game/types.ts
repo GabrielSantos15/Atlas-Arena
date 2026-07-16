@@ -11,8 +11,8 @@ export interface Game {
   questions: Question[];
   currentTimeout: NodeJS.Timeout | null;
   currentAnswers: Map<string, PlayerAnswer>;
-  questionStartedAt: number ;
-    resultTimeout: NodeJS.Timeout | null;
+  questionStartedAt: number;
+  resultTimeout: NodeJS.Timeout | null;
 }
 
 export interface Country {
