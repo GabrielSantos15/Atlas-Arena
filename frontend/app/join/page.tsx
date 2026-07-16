@@ -11,7 +11,7 @@ import socket from "@/lib/socket";
 type PublicRoom = {
     code: string;
     category: "geography";
-    mode: "flags" | "capitals" | "continents";
+    difficulty: "easy" | "medium" | "hard"; // <-- Atualizado para bater com o Back-end
     questionsAmount: number;
     questionTime: number;
     playersCount: number;
@@ -25,7 +25,7 @@ interface RoomResponse {
 }
 
 const categoryLabels = { geography: "Geografia" } as const;
-const modeLabels = { flags: "Bandeiras", capitals: "Capitais", continents: "Continentes" } as const;
+const difficultyLabels = { easy: "Fácil", medium: "Médio", hard: "Difícil" } as const;
 
 export default function JoinRoom() {
     const router = useRouter();
@@ -38,7 +38,7 @@ export default function JoinRoom() {
         let mounted = true;
         async function loadPublicRooms() {
             try {
-                const response = await fetch(`http://localhost:3001/rooms/public`);
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/rooms/public`);
                 if (!response.ok) throw new Error("Falha ao carregar salas públicas.");
                 const rooms = (await response.json()) as PublicRoom[];
                 if (mounted) setPublicRooms(rooms);
@@ -90,14 +90,14 @@ export default function JoinRoom() {
 
     return (
         <main className="flex min-h-[90vh] flex-col items-center justify-center gap-8 md:flex-row p-4 md:p-8">
-            
-            <FormUser 
-                mode="join" 
-                onSubmit={handleJoin} 
-                roomCode={roomCode} 
-                setRoomCode={setRoomCode} 
+
+            <FormUser
+                mode="join"
+                onSubmit={handleJoin}
+                roomCode={roomCode}
+                setRoomCode={setRoomCode}
             />
-            
+
             <section className="w-full max-w-xl rounded-3xl bg-[var(--bg-surface)] border border-[var(--border-color)] p-8 shadow-xl h-fit">
                 <header className="mb-8">
                     <h1 className="text-3xl font-bold">Salas Disponíveis</h1>
@@ -124,17 +124,16 @@ export default function JoinRoom() {
                                         key={room.code}
                                         type="button"
                                         onClick={() => handleJoinPublicRoom(room)}
-                                        className={`rounded-xl border p-4 text-left transition-all cursor-pointer ${
-                                            isSelected 
-                                            ? "border-[var(--color-secondary)] bg-[var(--color-secondary)]/10 shadow-md" 
-                                            : "border-[var(--border-color)] bg-[var(--background)] hover:border-[var(--color-secondary)]/50"
-                                        }`}
+                                        className={`rounded-xl border p-4 text-left transition-all cursor-pointer ${isSelected
+                                                ? "border-[var(--color-secondary)] bg-[var(--color-secondary)]/10 shadow-md"
+                                                : "border-[var(--border-color)] bg-[var(--background)] hover:border-[var(--color-secondary)]/50"
+                                            }`}
                                     >
                                         <div className="flex items-start justify-between gap-4">
                                             <div>
                                                 <p className="font-semibold text-lg">Sala {room.code}</p>
                                                 <p className="text-sm text-[var(--text-secondary)]">
-                                                    {categoryLabels[room.category]} - {modeLabels[room.mode]}
+                                                    {categoryLabels[room.category]} - {difficultyLabels[room.difficulty as keyof typeof difficultyLabels]}
                                                 </p>
                                             </div>
 
@@ -160,7 +159,7 @@ export default function JoinRoom() {
                         </p>
                     )}
                 </section>
-            
+
                 {error && <p className="mt-6 text-sm font-medium text-red-500 bg-red-500/10 p-3 rounded-xl">{error}</p>}
             </section>
         </main>
