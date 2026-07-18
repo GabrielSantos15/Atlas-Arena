@@ -39,7 +39,7 @@ export default function GameEndedPage({
   }, [finish]);
 
   return (
-    <section className="flex justify-evenly items-center flex-col md:flex-row flex-wrap-reverse relative">
+    <section className="flex justify-evenly items-center flex-col md:flex-row flex-wrap relative">
       {/* layer */}
       {/* <div className="fixed inset-0 z-[-1] bg-black/20 backdrop-blur-sm pointer-events-none" /> */}
       {
@@ -50,11 +50,11 @@ export default function GameEndedPage({
             <h2 className="text-2xl font-semibold center">{player.nickname}</h2>
           </div>
 
-          <div className="grid grid-cols-3 gap-4 text-center bg-[var(--color-primary)] text-white rounded-2xl p-2">
+          <div className="grid grid-cols-3 items-center justify-center gap-4 text-center bg-[var(--color-primary)] text-white rounded-2xl p-2">
 
             <div className="flex-col items-center justify-center  gap-2 border-r-1 border-white/30">
               <div className="flex items-center justify-center gap-2">
-                <Star size={28} />
+                <Star size={25} />
                 <h3 className="text-3xl font-bold text-center">
                   {player?.score}
                 </h3>
@@ -64,7 +64,7 @@ export default function GameEndedPage({
 
             <div className="flex-col items-center justify-center gap-2 border-r-1 border-white/30">
               <div className="flex items-center justify-center gap-2">
-                <CheckCircle size={28} />
+                <CheckCircle size={25} />
                 <h3 className="text-3xl font-bold text-center">
                   {(player?.correctAnswers) ?? 0}
                 </h3>
@@ -74,7 +74,7 @@ export default function GameEndedPage({
 
             <div className="flex-col items-center justify-center gap-2">
               <div className="flex items-center justify-center gap-2">
-                <XCircle size={28} />
+                <XCircle size={25} />
                 <h3 className="text-3xl font-bold text-center">
                   {room ? room.questionsAmount - (player?.correctAnswers ?? 0) : 0}
                 </h3>
@@ -100,10 +100,9 @@ export default function GameEndedPage({
           </div>
         </article>
       }
-      <div className="relative flex flex-col items-center">
-        <Podium ranking={ranking} className="w-[90%]" />
-
-        <Ranking ranking={ranking} className="z-10 w-full max-w-2xl" />
+      <div className="relative flex flex-col items-center w-full max-w-xl">
+        <Podium ranking={ranking} className="w-[90%] max-w-lg" />
+        <Ranking ranking={ranking} className="z-10 w-full" />
       </div>
 
     </section>
