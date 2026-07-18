@@ -11,6 +11,9 @@ import Ranking from "./Ranking";
 import { useGame } from "@/providers/GameProvider";
 import { useSounds } from "@/hooks/useSounds";
 import { useEffect } from "react";
+import { useLeaveRoom } from "@/hooks/useLeaveRoom";
+import { clearRoomSession } from "@/lib/storage/room-session";
+import { useRouter } from "next/router";
 
 interface GameEndedPageProps {
   ranking: Player[];
@@ -27,11 +30,11 @@ export default function GameEndedPage({
   const { room } = useGame()
   const playerId = getOrCreatePlayerId();
 
-  const { finish } = useSounds();
+  const { finish, } = useSounds();
 
   const player = ranking.find((p) => p.playerId === playerId);
 
-useEffect(() => {
+  useEffect(() => {
     finish();
   }, [finish]);
 

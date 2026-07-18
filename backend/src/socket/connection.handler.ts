@@ -1,7 +1,6 @@
 import type { Server, Socket } from "socket.io";
 
 import { players } from "../modules/player/repository.js";
-import type { Player } from "../modules/player/types.js";
 import { rooms } from "../modules/room/repository.js";
 import { destroyRoom, emitRoomUpdate } from "../modules/room/handler.js";
 
@@ -10,53 +9,49 @@ export function registerConnectionHandlers(io: Server, socket: Socket) {
     console.log(`❌ ${socket.id} disconnected`);
 
     for (const [id, player] of players.entries()) {
-      if (player.socketId !== socket.id) {
-        continue;
-      }
+      if (player.socketId !== socket.id) continue;
 
-      const updatedPlayer: Player = {
+      players.set(id, {
         ...player,
         socketId: undefined,
         online: false,
-      };
+      });
 
-      players.set(id, updatedPlayer);
+      const room = player.roomCode
+        ? rooms.get(player.roomCode)
+        : undefined;
 
-      const room = player.roomCode ? rooms.get(player.roomCode) : null;
+      if (!room) break;
 
-      if (room) {
-        const hasOnlinePlayers = room.players.some((playerId) => {
-          const currentPlayer = players.get(playerId);
+      // Se ninguém ficou online, destrói a sala
+      const hasOnlinePlayers = room.players.some((playerId) => {
+        return players.get(playerId)?.online;
+      });
 
-          return currentPlayer?.online;
-        });
+      if (!hasOnlinePlayers) {
+        destroyRoom(room.code);
 
-        // ninguém mais está conectado
-        if (!hasOnlinePlayers) {
-          destroyRoom(room.code);
+        console.log(`🗑️ Sala ${room.code} encerrada`);
 
-          console.log(`🗑️ Sala ${room.code} encerrada (todos offline)`);
-
-          break;
-        }
-
-        // troca host se necessário
-        if (room.hostId === player.playerId) {
-          const newHost = room.players
-            .map((playerId) => players.get(playerId))
-            .find((currentPlayer) => currentPlayer?.online);
-
-          if (newHost) {
-            room.hostId = newHost.playerId;
-
-            console.log(`👑 Novo host: ${newHost.nickname}`);
-          }
-        }
-
-        rooms.set(room.code, room);
-
-        emitRoomUpdate(io, room);
+        break;
       }
+
+      // Troca host caso necessário
+      if (room.hostId === player.playerId) {
+        const newHost = room.players
+          .map((id) => players.get(id))
+          .find((p) => p?.online);
+
+        if (newHost) {
+          room.hostId = newHost.playerId;
+
+          console.log(`👑 Novo host: ${newHost.nickname}`);
+        }
+      }
+
+      rooms.set(room.code, room);
+
+      emitRoomUpdate(io, room);
 
       break;
     }

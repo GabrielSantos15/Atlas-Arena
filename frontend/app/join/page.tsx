@@ -3,12 +3,13 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import FormUser from "@/components/setup/FormUser";
+import FormUser from "@/components/ui/FormUser";
 import type { PlayerSession } from "@/lib/storage/player-session";
 import { saveRoomSession } from "@/lib/storage/room-session";
 import socket from "@/lib/socket";
 import { useSounds } from "@/hooks/useSounds";
 import SoundButton from "@/components/ui/SoundButton";
+import { ArrowLeft } from "lucide-react";
 
 type PublicRoom = {
     code: string;
@@ -97,6 +98,18 @@ export default function JoinRoom() {
     return (
         <main className="flex min-h-[90vh] flex-col items-center justify-center gap-8 md:flex-row p-4 md:p-8">
             <SoundButton className="absolute top-4 right-4 md:top-8 md:right-8 z-50" />
+            <button
+                onClick={() => {
+                    click();
+                    router.push("/");
+                }}
+                className="absolute top-4 left-4 md:top-8 md:left-8 z-50 flex h-11 w-11 cursor-pointer items-center justify-center rounded-xl border border-[var(--border-color)] bg-[var(--bg-surface)] text-[var(--text-primary)] shadow-sm transition-all duration-200 hover:scale-105 hover:border-[var(--color-secondary)] hover:text-[var(--color-secondary)] active:scale-95"
+                aria-label="Voltar para o Início"
+                title="Voltar"
+            >
+                <ArrowLeft size={22} />
+            </button>
+            
             <FormUser
                 mode="join"
                 onSubmit={handleJoin}

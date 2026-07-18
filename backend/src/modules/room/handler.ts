@@ -204,6 +204,10 @@ export function registerRoomHandlers(io: Server, socket: Socket) {
     io.to(room.code).emit("room:restart");
     emitRoomUpdate(io, room);
   });
+
+  socket.on("room:leave", (data: { playerId: string }) => {
+  leaveRoom(io, socket, data.playerId);
+});
 }
 
 export function removePlayerFromRoom(io: Server, room: Room, playerId: string) {
@@ -251,4 +255,26 @@ export function destroyRoom(roomCode: string) {
   }
   games.delete(roomCode);
   rooms.delete(roomCode);
+}
+
+export function leaveRoom(
+  io: Server,
+  socket: Socket,
+  playerId: string
+) {
+  const player = players.get(playerId);
+
+  if (!player?.roomCode) return;
+
+  const room = rooms.get(player.roomCode);
+
+  if (!room) return;
+
+  socket.leave(room.code);
+
+  removePlayerFromRoom(io, room, playerId);
+
+  players.delete(playerId);
+
+  console.log(`🚪 ${player.nickname} saiu da sala ${room.code}`);
 }

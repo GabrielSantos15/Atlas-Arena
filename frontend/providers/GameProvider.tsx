@@ -53,6 +53,7 @@ export function GameProvider({
   const [roomSession, setRoomSession] =
     useState<RoomSession | null>(null);
 
+
   useEffect(() => {
     setRoomSession(getRoomSession());
   }, []);
@@ -69,6 +70,7 @@ export function GameProvider({
     useState<number | null>(null);
   const [totalQuestions, setTotalQuestions] =
     useState<number | null>(null);
+
 
   // Answer
   const [selectedAnswer, setSelectedAnswer] =
@@ -131,9 +133,26 @@ export function GameProvider({
     }
   }, [room, pathname, router]);
 
+  //sa
   useEffect(() => {
     setRoomSession(getRoomSession())
   }, [pathname]);
+    useEffect(() => {
+    if (!room) return;
+
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+
+      // Necessário para o Chrome exibir o alerta
+      event.returnValue = "";
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [room]);
 
   useEffect(() => {
     if (!ready || !session || !roomSession) {

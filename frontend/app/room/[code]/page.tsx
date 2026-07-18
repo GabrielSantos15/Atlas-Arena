@@ -9,6 +9,8 @@ import socket from "@/lib/socket";
 import UserImage from "@/components/ui/UserImage";
 import { LogOut, Play } from "lucide-react"; // Sugestão: Ícones para os botões!
 import { useSounds } from "@/hooks/useSounds";
+import { useLeaveRoom } from "@/hooks/useLeaveRoom";
+import SoundButton from "@/components/ui/SoundButton";
 
 const categoryLabels = {
     geography: "Geografia",
@@ -19,6 +21,7 @@ export default function RoomPage() {
     const { click } = useSounds();
     const { room, playerId, error, roomCode } = useRoom();
     const { session } = usePlayer();
+    const leaveRoom = useLeaveRoom();
 
     function handleStart() {
         if (!session || !roomCode) return;
@@ -32,14 +35,18 @@ export default function RoomPage() {
 
     function handleLeave() {
         click()
+        leaveRoom()
         clearRoomSession();
         router.push("/");
     }
 
+    const sortedPlayers = [...(room?.players ?? [])].sort((a, b) => {
+        return Number(b.online) - Number(a.online);
+    });
+
     return (
         <main className="min-h-screen p-4 md:p-8 flex justify-center items-start">
             <div className="w-full max-w-4xl mt-4 md:mt-12">
-
                 <header className="mb-8 flex items-center justify-between rounded-3xl bg-[var(--bg-surface)] p-6 md:p-8 border border-[var(--border-color)] shadow-sm">
                     <div>
                         <h1 className="text-3xl md:text-4xl font-bold">
@@ -51,13 +58,17 @@ export default function RoomPage() {
                         </p>
                     </div>
 
-                    <button
-                        onClick={handleLeave}
-                        className="flex items-center gap-2 rounded-xl border-2 border-[var(--border-color)] bg-transparent px-5 py-3 font-semibold text-[var(--text-secondary)] transition-all hover:border-red-500 hover:text-red-500 hover:bg-red-500/5 active:scale-95"
-                    >
-                        <LogOut size={18} />
-                        <span className="hidden sm:block">Sair da Sala</span>
-                    </button>
+                    <div className="flex items-center gap-3">
+                        <SoundButton />
+
+                        <button
+                            onClick={handleLeave}
+                            className="flex items-center gap-2 rounded-xl border-2 border-[var(--border-color)] bg-transparent px-5 py-3 font-semibold text-[var(--text-secondary)] transition-all hover:border-red-500 hover:text-red-500 hover:bg-red-500/5 active:scale-95 cursor-pointer"
+                        >
+                            <LogOut size={18} />
+                            <span className="hidden sm:block">Sair da Sala</span>
+                        </button>
+                    </div>
                 </header>
 
                 {error && (
@@ -97,7 +108,7 @@ export default function RoomPage() {
                     </h2>
 
                     <ul className="space-y-3 mb-8 max-h-[40vh] overflow-y-auto custom-scrollbar pr-2">
-                        {(room?.players ?? []).map((player) => {
+                        {sortedPlayers.map((player) => {
                             const isMe = player.playerId === playerId;
                             const isHost = room?.hostId === player.playerId;
 

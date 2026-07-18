@@ -13,6 +13,9 @@ import { getOrCreatePlayerId } from "@/lib/player";
 import { motion, AnimatePresence } from "framer-motion";
 import SoundButton from "@/components/ui/SoundButton";
 import { useSounds } from "@/hooks/useSounds";
+import { useLeaveRoom } from "@/hooks/useLeaveRoom";
+import { clearRoomSession } from "@/lib/storage/room-session";
+import { LogOut } from "lucide-react";
 
 export default function GamePage() {
     const {
@@ -26,6 +29,7 @@ export default function GamePage() {
         gameEnded,
     } = useGame();
     const router = useRouter();
+    const leaveRoom = useLeaveRoom();
 
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const { click } = useSounds();
@@ -34,6 +38,13 @@ export default function GamePage() {
         if (!room) { router.replace("/join"); }
         if (room?.status === "waiting") router.replace(`/room/${room.code}`);
     }, [room, router]);
+
+    function handleLeave() {
+        click()
+        leaveRoom()
+        clearRoomSession();
+        router.push("/");
+    }
 
     if (!room) {
         return null;
@@ -50,10 +61,7 @@ export default function GamePage() {
                         playerId: getOrCreatePlayerId(),
                     });
                 }}
-                onBack={() => {
-                    click();
-                    router.push(`/`);
-                }}
+                onBack={handleLeave}
             />
 
         );
@@ -98,6 +106,13 @@ export default function GamePage() {
                                 </button>
                             </div>
                             <Ranking ranking={ranking} />
+                            <button
+                                onClick={handleLeave}
+                                className="flex items-center gap-2 rounded-xl border-2 border-[var(--border-color)] bg-transparent px-5 py-3 font-semibold text-[var(--text-secondary)] transition-all hover:border-red-500 hover:text-red-500 hover:bg-red-500/5 active:scale-95 cursor-pointer ml-auto mt-8"
+                            >
+                                <LogOut size={18} />
+                                <span >Sair da Sala</span>
+                            </button>
                         </motion.div>
                     </div>
                 )}
@@ -128,6 +143,13 @@ export default function GamePage() {
                         )}
                     </div>
                     <Ranking ranking={ranking} />
+                    <button
+                        onClick={handleLeave}
+                        className="flex items-center gap-2 rounded-xl border-2 border-[var(--border-color)] bg-transparent px-5 py-3 font-semibold text-[var(--text-secondary)] transition-all hover:border-red-500 hover:text-red-500 hover:bg-red-500/5 active:scale-95 cursor-pointer"
+                    >
+                        <LogOut size={18} />
+                        <span >Sair da Sala</span>
+                    </button>
                 </aside>
 
                 {/* Quiz / Resultado */}
