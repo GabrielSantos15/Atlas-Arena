@@ -240,7 +240,6 @@ export default function CreateRoom() {
                   onChange={(event) => { click(); setQuestionsAmount(Number(event.target.value)) }}
                   className="w-full appearance-none rounded-xl border border-[var(--border-color)] bg-[var(--background)] p-3 pr-10 h-[50px] outline-none focus:border-[var(--color-secondary)] cursor-pointer text-sm font-medium"
                 >
-                  <option value={1}>1</option>
                   <option value={5}>5</option>
                   <option value={10}>10</option>
                   <option value={15}>15</option>
